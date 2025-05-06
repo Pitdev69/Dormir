@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hora de Dormir, Mitsu!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .sleep-gradient {
+            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+        }
+        
+        .moon-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 4s infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        
+        .progress-bar {
+            height: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .sleep-tip-card {
+            transition: all 0.3s ease;
+        }
+        
+        .sleep-tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .night-sky {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-glow {
+            box-shadow: 0 0 15px rgba(100, 149, 237, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-glow:hover {
+            box-shadow: 0 0 25px rgba(100, 149, 237, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Céu noturno com estrelas -->
+    <div class="night-sky absolute w-full h-full -z-10">
+        <!-- Estrelas serão adicionadas via JavaScript -->
+    </div>
+    
+    <header class="sleep-gradient py-6 px-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                <i class="fas fa-moon mr-3"></i> Hora de Dormir, Mitsu!
+            </h1>
+            <div class="flex items-center space-x-2">
+                <span class="hidden md:inline">Dias consecutivos:</span>
+                <div class="bg-white text-indigo-900 font-bold rounded-full w-10 h-10 flex items-center justify-center">
+                    <span id="streak-count">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Seção principal -->
+            <section class="bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8 mb-8 shadow-xl border border-white/10">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 flex justify-center mb-6 md:mb-0">
+                        <div class="moon-animation">
+                            <i class="fas fa-moon text-yellow-200 text-8xl"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 md:pl-8">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4">Olá, Mitsu! 🌙</h2>
+                        <p class="mb-4 text-lg">Você sabe que dormir cedo é essencial para sua saúde e bem-estar. Vamos te ajudar a criar uma rotina saudável!</p>
+                        
+                        <div class="bg-indigo-900/50 rounded-lg p-4 mb-6">
+                            <h3 class="font-bold mb-2">Seu horário ideal para dormir:</h3>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xl font-mono" id="bedtime">22:00</span>
+                                <button id="set-time-btn" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition">
+                                    Alterar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="font-bold mb-2">Faltam:</h3>
+                            <div class="text-4xl font-mono font-bold text-indigo-300" id="countdown">--:--:--</div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button id="slept-btn" class="btn-glow bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-bold flex items-center transition">
+                                <i class="fas fa-bed mr-2"></i> Dormi!
+                            </button>
+                            <button id="skip-btn" class="bg-rose-600 hover:bg-rose-700 px-6 py-3 rounded-lg font-bold flex items-center transition">
+                                <i class="fas fa-moon mr-2"></i> Pular hoje
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Progresso semanal -->
+            <section class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-xl border border-white/10">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3"></i> Seu Progresso
+                </h2>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2">
+                        <span>Meta semanal: 7 dias</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-3">
+                        <div id="progress-bar" class="progress-bar bg-indigo-500 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-7 gap-2">
+                    <!-- Dias da semana serão adicionados via JavaScript -->
+                </div>
+            </section>
+            
+            <!-- Dicas para dormir -->
+            <section class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-xl border border-white/10">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-lightbulb mr-3"></i> Dicas para Dormir Melhor
+                </h2>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="sleep-tip-card bg-indigo-900/50 rounded-lg p-5">
+                        <div class="text-yellow-300 text-3xl mb-3">
+                            <i class="fas fa-mobile-screen"></i>
+                        </div>
+                        <h3 class="font-bold mb-2">Evite telas antes de dormir</h3>
+                        <p class="text-sm">A luz azul dos dispositivos pode atrapalhar seu sono. Tente desligar tudo 1 hora antes de dormir.</p>
+                    </div>
+                    
+                    <div class="sleep-tip-card bg-indigo-900/50 rounded-lg p-5">
+                        <div class="text-yellow-300 text-3xl mb-3">
+                            <i class="fas fa-mug-hot"></i>
+                        </div>
+                        <h3 class="font-bold mb-2">Evite cafeína à noite</h3>
+                        <p class="text-sm">Café, chá preto e refrigerantes podem te manter acordada. Prefira chás calmantes como camomila.</p>
+                    </div>
+                    
+                    <div class="sleep-tip-card bg-indigo-900/50 rounded-lg p-5">
+                        <div class="text-yellow-300 text-3xl mb-3">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3 class="font-bold mb-2">Leitura relaxante</h3>
+                        <p class="text-sm">Ler um livro físico (não digital) pode ajudar a acalmar a mente e preparar o corpo para dormir.</p>
+                    </div>
+                    
+                    <div class="sleep-tip-card bg-indigo-900/50 rounded-lg p-5">
+                        <div class="text-yellow-300 text-3xl mb-3">
+                            <i class="fas fa-spa"></i>
+                        </div>
+                        <h3 class="font-bold mb-2">Rotina de relaxamento</h3>
+                        <p class="text-sm">Crie um ritual antes de dormir: lavar o rosto, escovar os dentes, alongar ou meditar por 5 minutos.</p>
+                    </div>
+                    
+                    <div class="sleep-tip-card bg-indigo-900/50 rounded-lg p-5">
+                        <div class="text-yellow-300 text-3xl mb-3">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <h3 class="font-bold mb-2">Ambiente confortável</h3>
+                        <p class="text-sm">Mantenha seu quarto escuro, fresco e silencioso. Invista em um bom travesseiro e colchão.</p>
+                    </div>
+                    
+                    <div class="sleep-tip-card bg-indigo-900/50 rounded-lg p-5">
+                        <div class="text-yellow-300 text-3xl mb-3">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="font-bold mb-2">Horário consistente</h3>
+                        <p class="text-sm">Tente dormir e acordar no mesmo horário todos os dias, mesmo nos finais de semana.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="sleep-gradient py-4 px-4 text-center text-sm">
+        <p>Feito com <i class="fas fa-heart text-rose-400"></i> para ajudar a Mitsu a dormir melhor</p>
+    </footer>
+    
+    <!-- Modal para definir horário -->
+    <div id="time-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">Definir horário para dormir</h3>
+            <div class="flex items-center justify-center mb-6">
+                <input type="time" id="time-input" class="bg-gray-700 text-white text-xl px-4 py-2 rounded-lg">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancel-time-btn" class="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 transition">
+                    Cancelar
+                </button>
+                <button id="save-time-btn" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de recompensa -->
+    <div id="reward-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+        <div class="bg-gradient-to-br from-purple-900 to-indigo-800 rounded-xl p-8 max-w-md w-full mx-4 text-center">
+            <div class="text-6xl mb-4 text-yellow-300">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Parabéns, Mitsu!</h3>
+            <p class="mb-6" id="reward-message">Você completou 7 dias dormindo cedo!</p>
+            <button id="close-reward-btn" class="btn-glow bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-lg font-bold transition">
+                Continuar
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Configurações iniciais
+        let bedtime = "22:00";
+        let streak = 0;
+        let weeklyProgress = [false, false, false, false, false, false, false]; // Dias da semana (0=domingo, 6=sábado)
+        let lastUpdatedDay = -1;
+        
+        // Elementos do DOM
+        const countdownEl = document.getElementById('countdown');
+        const bedtimeEl = document.getElementById('bedtime');
+        const streakEl = document.getElementById('streak-count');
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercent = document.getElementById('progress-percent');
+        const weekGrid = document.querySelector('.grid.grid-cols-7');
+        const sleptBtn = document.getElementById('slept-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const setTimeBtn = document.getElementById('set-time-btn');
+        const timeModal = document.getElementById('time-modal');
+        const timeInput = document.getElementById('time-input');
+        const saveTimeBtn = document.getElementById('save-time-btn');
+        const cancelTimeBtn = document.getElementById('cancel-time-btn');
+        const rewardModal = document.getElementById('reward-modal');
+        const rewardMessage = document.getElementById('reward-message');
+        const closeRewardBtn = document.getElementById('close-reward-btn');
+        const nightSky = document.querySelector('.night-sky');
+        
+        // Carregar dados do localStorage
+        function loadData() {
+            const savedBedtime = localStorage.getItem('mitsuBedtime');
+            const savedStreak = localStorage.getItem('mitsuStreak');
+            const savedProgress = localStorage.getItem('mitsuProgress');
+            const savedLastDay = localStorage.getItem('mitsuLastDay');
+            
+            if (savedBedtime) bedtime = savedBedtime;
+            if (savedStreak) streak = parseInt(savedStreak);
+            if (savedProgress) weeklyProgress = JSON.parse(savedProgress);
+            if (savedLastDay) lastUpdatedDay = parseInt(savedLastDay);
+            
+            updateUI();
+        }
+        
+        // Salvar dados no localStorage
+        function saveData() {
+            localStorage.setItem('mitsuBedtime', bedtime);
+            localStorage.setItem('mitsuStreak', streak.toString());
+            localStorage.setItem('mitsuProgress', JSON.stringify(weeklyProgress));
+            localStorage.setItem('mitsuLastDay', lastUpdatedDay.toString());
+        }
+        
+        // Atualizar a interface
+        function updateUI() {
+            bedtimeEl.textContent = bedtime;
+            streakEl.textContent = streak;
+            
+            // Atualizar progresso semanal
+            const completedDays = weeklyProgress.filter(day => day).length;
+            const percent = Math.round((completedDays / 7) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            
+            // Atualizar grid de dias
+            weekGrid.innerHTML = '';
+            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            
+            days.forEach((day, index) => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'flex flex-col items-center';
+                
+                const dayName = document.createElement('span');
+                dayName.className = 'text-xs mb-1';
+                dayName.textContent = day;
+                
+                const dayStatus = document.createElement('div');
+                dayStatus.className = `w-8 h-8 rounded-full flex items-center justify-center ${
+                    weeklyProgress[index] ? 'bg-green-500' : 'bg-gray-700'
+                }`;
+                dayStatus.innerHTML = weeklyProgress[index] ? '<i class="fas fa-check"></i>' : '<i class="fas fa-moon"></i>';
+                
+                dayEl.appendChild(dayName);
+                dayEl.appendChild(dayStatus);
+                weekGrid.appendChild(dayEl);
+            });
+        }
+        
+        // Criar estrelas no céu
+        function createStars() {
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Tamanho aleatório entre 1px e 3px
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Posição aleatória
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Atraso aleatório na animação
+                star.style.animationDelay = `${Math.random() * 4}s`;
+                
+                nightSky.appendChild(star);
+            }
+        }
+        
+        // Atualizar contador regressivo
+        function updateCountdown() {
+            const now = new Date();
+            const [hours, minutes] = bedtime.split(':').map(Number);
+            
+            let targetTime = new Date();
+            targetTime.setHours(hours, minutes, 0, 0);
+            
+            // Se já passou do horário hoje, considerar amanhã
+            if (now > targetTime) {
+                targetTime.setDate(targetTime.getDate() + 1);
+            }
+            
+            const diff = targetTime - now;
+            
+            const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+            const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secondsLeft = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            countdownEl.textContent = `${String(hoursLeft).padStart(2, '0')}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+        }
+        
+        // Verificar e atualizar o progresso diário
+        function checkDailyProgress() {
+            const today = new Date().getDay(); // 0 (domingo) a 6 (sábado)
+            
+            // Se já atualizamos hoje, não fazer nada
+            if (today === lastUpdatedDay) return;
+            
+            // Se for um novo dia, resetar o status de "dormiu" para hoje
+            // E se pulou o dia anterior, resetar a sequência
+            if (today !== (lastUpdatedDay + 1) % 7 && lastUpdatedDay !== -1) {
+                streak = 0;
+            }
+            
+            // Resetar o status de "dormiu" para o novo dia
+            weeklyProgress[today] = false;
+            lastUpdatedDay = today;
+            
+            saveData();
+            updateUI();
+        }
+        
+        // Mostrar recompensa
+            rewardMessage.textContent = message;
+            rewardModal.classList.remove('hidden');
+        }
+        
+        // Event listeners
+        sleptBtn.addEventListener('click', () => {
+            const today = new Date().getDay();
+            weeklyProgress[today] = true;
+            streak++;
+            
+            // Verificar recompensas
+            if (streak % 7 === 0) {
+                showReward(`Você completou ${streak} dias dormindo cedo! Continue assim!`);
+            } else if (streak === 3) {
+                showReward("Ótimo trabalho! 3 dias seguidos dormindo cedo!");
+            }
+            
+            saveData();
+            updateUI();
+        });
+        
+        skipBtn.addEventListener('click', () => {
+            streak = 0;
+            saveData();
+            updateUI();
+            alert("Tudo bem, Mitsu! Amanhã é um novo dia para tentar novamente. 😊");
+        });
+        
+        setTimeBtn.addEventListener('click', () => {
+            timeInput.value = bedtime;
+            timeModal.classList.remove('hidden');
+        });
+        
+        saveTimeBtn.addEventListener('click', () => {
+            bedtime = timeInput.value;
+            bedtimeEl.textContent = bedtime;
+            timeModal.classList.add('hidden');
+            saveData();
+        });
+        
+        cancelTimeBtn.addEventListener('click', () => {
+            timeModal.classList.add('hidden');
+        });
+        
+        closeRewardBtn.addEventListener('click', () => {
+            rewardModal.classList.add('hidden');
+        });
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            createStars();
+            updateCountdown();
+            checkDailyProgress();
+            
+            // Atualizar contador a cada segundo
+            setInterval(updateCountdown, 1000);
+            
+            // Verificar progresso diário a cada hora
+            setInterval(checkDailyProgress, 3600000);
+        });
+    </script>
+</body>
+</html>
